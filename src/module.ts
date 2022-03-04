@@ -1,8 +1,8 @@
 import { PanelPlugin } from '@grafana/data';
 import { SimpleOptions } from './types';
-import { GeoTrackPanel } from './GeoTrackPanel';
+import { GeotrackPanel } from './GeotrackPanel';
 
-export const plugin = new PanelPlugin<SimpleOptions>(GeoTrackPanel).setPanelOptions(builder => {
+export const plugin = new PanelPlugin<SimpleOptions>(GeotrackPanel).setPanelOptions((builder) => {
   return builder
     .addTextInput({
       path: 'text',
@@ -35,6 +35,6 @@ export const plugin = new PanelPlugin<SimpleOptions>(GeoTrackPanel).setPanelOpti
           },
         ],
       },
-      showIf: config => config.showSeriesCount,
+      showIf: (config) => config.showSeriesCount,
     });
 });

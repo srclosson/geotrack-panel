@@ -20,6 +20,9 @@
     "ol": "6.13.0",
     "olcs": "2.13.0"
   },
+  "dependencies": {
+    "cesium": "1.91.0"
+  },
   "engines": {
     "node": ">=14"
   }
