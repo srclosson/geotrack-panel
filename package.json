@@ -16,7 +16,9 @@
     "@grafana/data": "latest",
     "@grafana/toolkit": "latest",
     "@grafana/ui": "latest",
-    "emotion": "10.0.27"
+    "emotion": "10.0.27",
+    "ol": "6.13.0",
+    "olcs": "2.13.0"
   },
   "engines": {
     "node": ">=14"
