@@ -17,11 +17,14 @@
     "@grafana/toolkit": "latest",
     "@grafana/ui": "latest",
     "emotion": "10.0.27",
-    "ol": "6.13.0",
-    "olcs": "2.13.0"
-  },
-  "dependencies": {
-    "cesium": "1.91.0"
+    "deck.gl": "8.7.0",
+    "@deck.gl/react": "8.7.0",
+    "@deck.gl/layers": "8.7.0",
+    "@danmarshall/deckgl-typings": "4.9.15",
+    "@deck.gl/carto": "8.7.0",
+    "react-map-gl": "6.1.19",
+    "react-scripts": "5.0.0",
+    "@deck.gl/geo-layers": "8.7.0"
   },
   "engines": {
     "node": ">=14"
