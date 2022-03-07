@@ -17,10 +17,12 @@
     "@grafana/toolkit": "latest",
     "@grafana/ui": "latest",
     "emotion": "10.0.27",
-    "ol": "6.13.0",
-    "olcs": "2.13.0"
+    "copy-webpack-plugin": "10.2.4"
   },
   "dependencies": {
+    "ol": "6.13.0",
+    "olcs": "2.13.0",
+    "postscribe": "2.0.8",
     "cesium": "1.91.0"
   },
   "engines": {
