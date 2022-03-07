@@ -4,7 +4,9 @@ import { SimpleOptions } from 'types';
 // import { css /*, cx */ } from 'emotion';
 // import { stylesFactory /*, useTheme*/ } from '@grafana/ui';
 import DeckGL from '@deck.gl/react';
-// import { LineLayer } from '@deck.gl/layers';
+import { LineLayer } from '@deck.gl/layers';
+import { COORDINATE_SYSTEM, RGBAColor } from '@deck.gl/core';
+
 //import { BASEMAP } from '@deck.gl/carto';
 import StaticMap from 'react-map-gl';
 import { TerrainLayer } from '@deck.gl/geo-layers';
@@ -121,26 +123,53 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   //   }
   // });
 
-  console.log("we got data", data);
+    
+  const lat = data.series[0].fields[1].values.toArray();
+  const latTime = data.series[0].fields[0].values.toArray();
+  const lon = data.series[1].fields[1].values.toArray();
+  const ele = data.series[2].fields[1].values.toArray();
+  const hr = data.series[3].fields[1].values.toArray();
+  let lineLayerData = [];
+  for (let i = 1; i <= lat.length - 1; i++) {
+    lineLayerData.push({
+      inbound: i-1,
+      outbound: i,
+      from: {
+        name: `lat: ${lat[i-1]}, lon: ${lon[i-1]}, ele: ${ele[i-1]}, time: ${latTime[i-1]}`,
+        coordinates: [lat[i-1], lon[i-1], ele[i-1]],
+        hr: hr[i-1]
+      },
+      to: {
+        name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
+        coordinates: [lat[i], lon[i], ele[i]],
+        hr: hr[i]
+      }
+    });
+  }
+    
+  console.log("linelayerdata", lineLayerData);
+  const lineLayer = new LineLayer({
+    id: 'line-layer',
+    data: lineLayerData,
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+    getWidth: 5,
+    getSourcePosition: (d: any) => d.from.coordinates,
+    getTargetPosition: (d: any) => d.to.coordinates,
+    getColor: (d: any) => {
+      const result: RGBAColor = [((d.from.hr-140)/(190-140))*255, 140, 0];
+      console.log("colour", d, result);
+      return result;
+    },
+  });
+
   return (
     <div>
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer]}>
-        <HexagonLayer 
-          id='hexagon-layer'
-          data={data}
-          pickable={true}
-          extruded={true}
-          getPosition={(d) => {
-            console.log("d", d);
-            const p: Position = [0,0,0];
-            return p;
-          }}
-          />
+      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer, lineLayer]} >
         <StaticMap
           mapboxApiAccessToken={MAPBOX_TOKEN}
           //mapStyle={BASEMAP.POSITRON}
           mapStyle={MAPBOX_BASE_LAYER}
-        />
+        />        
       </DeckGL>
     </div>
   );
