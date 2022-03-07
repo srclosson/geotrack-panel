@@ -7,7 +7,9 @@ import DeckGL from '@deck.gl/react';
 // import { LineLayer } from '@deck.gl/layers';
 //import { BASEMAP } from '@deck.gl/carto';
 import StaticMap from 'react-map-gl';
-import {TerrainLayer} from '@deck.gl/geo-layers';
+import { TerrainLayer } from '@deck.gl/geo-layers';
+// import { Position } from 'deck.gl';
+//import { DataFrame } from '@grafana/data';
 
 
 const MAX_ZOOM = 19;
@@ -107,9 +109,33 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     color: [255, 255, 255]
   });
 
+  // const hexLayer = new HexagonLayer({
+  //   id: 'hexagon-layer',
+  //   data,
+  //   pickable: true,
+  //   extruded: true,
+  //   radius: 200,
+  //   elevationScale: 4,
+  //   getPosition: d => {
+      
+  //   }
+  // });
+
+  console.log("we got data", data);
   return (
     <div>
       <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer]}>
+        <HexagonLayer 
+          id='hexagon-layer'
+          data={data}
+          pickable={true}
+          extruded={true}
+          getPosition={(d) => {
+            console.log("d", d);
+            const p: Position = [0,0,0];
+            return p;
+          }}
+          />
         <StaticMap
           mapboxApiAccessToken={MAPBOX_TOKEN}
           //mapStyle={BASEMAP.POSITRON}
