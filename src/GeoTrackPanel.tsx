@@ -82,33 +82,43 @@ interface Props extends PanelProps<GeoTrackPanelOptions> {}
 const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
 const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
 
-type TimeLLZ = { ts: number; lat: number; lon: number; ele: number , hr: number};
+// type TimeLLZ = { ts: number; lat: number; lon: number; ele: number , hr: number};
+type TimeLLZ = { lat: number; lon: number; ele: number , hr: number};
 
-function readTimePosData(series: DataFrame, options: GeoTrackPanelOptions): TimeLLZ[] {
+function readTimePosData(series: DataFrame[], options: GeoTrackPanelOptions): TimeLLZ[] {
+  // temp field definitions
+  let latF;
+  let lonF;
+  let altF;
+  // let tsF;
+  let hrF;
 
-  const latitudeField = series.fields.find((field) => field.name === options.latitudeColumnName);
-  const longitudeField = series.fields.find((field) => field.name === options.longitudeColumnName);
-  const altitudeField = series.fields.find((field) => field.name === options.altitudeColumnName);
-  const timeField = series.fields.find((field) => field.name === options.timeColumnName);
-  const hrField = series.fields.find((field) => field.name === options.hrColumnName);
+  for (var s of series) {
+    console.log(s);
+    if !latF {  latF = s.fields.find((field) => field.name === options.latitudeColumnName)  };
+    if !lonF { lonF = s.fields.find((field) => field.name === options.longitudeColumnName) };
+    if !altF { altF = s.fields.find((field) => field.name === options.altitudeColumnName) };
+    // if !tsF { tsF = s.fields.find((field) => field.name === options.timeColumnName) };
+    if !hrF { hrF = s.fields.find((field) => field.name === options.hrColumnName) };
+  };
 
-  if (!latitudeField || !longitudeField || !timeField || !altitudeField || !hrField) {
+  const latitudeField = latF;
+  const longitudeField = lonF;
+  const altitudeField = altF;
+  // const timeField = tsF;
+  const hrField = hrF;
+
+  if (!latitudeField || !longitudeField || !altitudeField || !hrField) {
     console.log("Missing requires fields in dataset");
     return [];
   }
 
-  console.log("Found latitude column: ", latitudeField.name);
-  console.log("Found longitude column: ", longitudeField.name);
-  console.log("Found altitude column: ", altitudeField.name);
-  console.log("Found time column: ", timeField.name);
-  console.log("Found heart rate column: ", hrField.name);
-
-  const len = Math.min(timeField.values.length, latitudeField.values.length, longitudeField.values.length);
+  const len = Math.min(altitudeField.values.length, latitudeField.values.length, longitudeField.values.length);
 
   var dataset: TimeLLZ[] = [];
   for (var i = 0; i < len; i++) {
     dataset.push({
-      ts: timeField.values.get(i) as number,
+      // ts: timeField.values.get(i) as number,
       lat: latitudeField.values.get(i),
       lon: longitudeField.values.get(i),
       ele: altitudeField.values.get(i),
@@ -158,7 +168,7 @@ export const GeoTrackPanel: React.FC<Props> = ({ options, data, width, height })
     return null;
   }
 
-  const llzArray = readTimePosData(data.series[0], options);
+  const llzArray = readTimePosData(data.series, options);
   if (llzArray.length === 0) {
     console.log('Data series length is 0');
     return null;
