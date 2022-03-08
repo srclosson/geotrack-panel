@@ -1,8 +1,11 @@
 import React from 'react';
-import { PanelProps } from '@grafana/data';
-import { SimpleOptions } from 'types';
-// import { css /*, cx */ } from 'emotion';
-// import { stylesFactory /*, useTheme*/ } from '@grafana/ui';
+
+import { PanelProps, DataFrame } from '@grafana/data';
+import { GeoTrackPanelOptions } from 'types';
+
+import { css, cx } from 'emotion';
+import { stylesFactory } from '@grafana/ui';
+
 import DeckGL from '@deck.gl/react';
 import { LineLayer } from '@deck.gl/layers';
 import { COORDINATE_SYSTEM, RGBAColor } from '@deck.gl/core';
@@ -11,7 +14,6 @@ import { COORDINATE_SYSTEM, RGBAColor } from '@deck.gl/core';
 import StaticMap from 'react-map-gl';
 import { TerrainLayer } from '@deck.gl/geo-layers';
 // import { Position } from 'deck.gl';
-//import { DataFrame } from '@grafana/data';
 
 const MAX_ZOOM = 19;
 const MIN_ZOOM = 2;
@@ -27,10 +29,12 @@ const BASEMAP_TILE_SERVERS = [
   '//stamen-tiles-b.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg',
   '//stamen-tiles-c.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg',
 ];
+
 const BASEMAP_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Design</a>, under
 <a href="http://creativecommons.org/licenses/by/3.0"> CC BY 3.0</a>. Data by
 <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">
 ODbL</a>.`.replace(/\n/gm, '');
+
 const COMMON_LAYER_CONFIG = {
   minZoom: 2,
   maxZoom: 17, // New data will be requested until this level
@@ -41,6 +45,7 @@ const COMMON_LAYER_CONFIG = {
   maxVisibleRasterLayers: 3,
   maxConfigurableLayers: 26,
 };
+
 const MAP_CONFIG = {
   MIN_ZOOM: 1,
   MAX_ZOOM: 18,
@@ -72,25 +77,51 @@ const MAPBOX_BASE_LAYER = {
   ],
 };
 
-interface Props extends PanelProps<SimpleOptions> {}
+interface Props extends PanelProps<GeoTrackPanelOptions> {}
 
 const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
 const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
 
-export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
-  //const theme = useTheme();
-  //const styles = getStyles();
+type TimeLLZ = { ts: number; lat: number; lon: number; ele: number , hr: number};
 
-  // Viewport settings
-  const INITIAL_VIEW_STATE = {
-    latitude: 37.6493,
-    longitude: -122.5233,
-    zoom: 5,
-    bearing: 0,
-    pitch: 0,
-    maxZoom: MAX_ZOOM,
-    minZoom: MIN_ZOOM,
-  };
+function readTimePosData(series: DataFrame, options: GeoTrackPanelOptions): TimeLLZ[] {
+
+  const latitudeField = series.fields.find((field) => field.name === options.latitudeColumnName);
+  const longitudeField = series.fields.find((field) => field.name === options.longitudeColumnName);
+  const altitudeField = series.fields.find((field) => field.name === options.altitudeColumnName);
+  const timeField = series.fields.find((field) => field.name === options.timeColumnName);
+  const hrField = series.fields.find((field) => field.name === options.hrColumnName);
+
+  if (!latitudeField || !longitudeField || !timeField || !altitudeField || !hrField) {
+    console.log("Missing requires fields in dataset");
+    return [];
+  }
+
+  console.log("Found latitude column: ", latitudeField.name);
+  console.log("Found longitude column: ", longitudeField.name);
+  console.log("Found altitude column: ", altitudeField.name);
+  console.log("Found time column: ", timeField.name);
+  console.log("Found heart rate column: ", hrField.name);
+
+  const len = Math.min(timeField.values.length, latitudeField.values.length, longitudeField.values.length);
+
+  var dataset: TimeLLZ[] = [];
+  for (var i = 0; i < len; i++) {
+    dataset.push({
+      ts: timeField.values.get(i) as number,
+      lat: latitudeField.values.get(i),
+      lon: longitudeField.values.get(i),
+      ele: altitudeField.values.get(i),
+      hr: hrField.values.get(i),
+    });
+  }
+
+  return dataset;
+}
+
+export const GeoTrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
+  //const theme = useTheme();
+  const styles = getStyles();
 
   const ELEVATION_DECODER = {
     rScaler: 6553.6,
@@ -122,25 +153,35 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   //   }
   // });
 
-  const lat = data.series[0].fields[1].values.toArray();
-  const latTime = data.series[0].fields[0].values.toArray();
-  const lon = data.series[1].fields[1].values.toArray();
-  const ele = data.series[2].fields[1].values.toArray();
-  const hr = data.series[3].fields[1].values.toArray();
+  if (data.series.length < 1) {
+    console.log('No data series provided');
+    return null;
+  }
+
+  const llzArray = readTimePosData(data.series[0], options);
+  if (llzArray.length === 0) {
+    console.log('Data series length is 0');
+    return null;
+  }  
+
   let lineLayerData = [];
-  for (let i = 1; i <= lat.length - 1; i++) {
+  for (var i = 1; i < llzArray.length; i++) {
+    var last_llz = llzArray[i-1];
+    var llz = llzArray[i];
     lineLayerData.push({
       inbound: i - 1,
       outbound: i,
+      // TODO: create iterator for fields other than lat, lon, ele
+      // pack them into an array
       from: {
-        name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-        coordinates: [lat[i - 1], lon[i - 1], ele[i - 1]],
-        hr: hr[i - 1],
+        name: last_llz.toString(),
+        coordinates: [last_llz.lat, last_llz.lon, last_llz.ele],
+        hr: last_llz.hr, // sens_vals: last_llz.sens_vals
       },
       to: {
-        name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-        coordinates: [lat[i], lon[i], ele[i]],
-        hr: hr[i],
+        name: llz.toString(),
+        coordinates: [llz.lat, llz.lon, llz.ele],
+        hr: llz.hr, // sens_vals: llz.sens_vals
       },
     });
   }
@@ -154,15 +195,36 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     getSourcePosition: (d: any) => d.from.coordinates,
     getTargetPosition: (d: any) => d.to.coordinates,
     getColor: (d: any) => {
-      const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
-      console.log('colour', d, result);
+      // const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
+      const result: RGBAColor = [255, 0, 0];
+      // console.log('colour', d, result);
       return result;
     },
   });
 
+  // Viewport settings
+  const firstPoint = lineLayerData[0].from.coordinates;
+  const INITIAL_VIEW_STATE = {
+    latitude: firstPoint[0],
+    longitude: firstPoint[1],
+    zoom: 5,
+    bearing: 0,
+    pitch: 0,
+    maxZoom: MAX_ZOOM,
+    minZoom: MIN_ZOOM,
+  };
+
   return (
-    <div>
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer, lineLayer]}>
+    <div
+      className={cx(
+        styles.wrapper,
+        css`
+          width: ${width}px;
+          height: ${height}px;
+        `
+      )}
+    >
+    <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[lineLayer, terrainLayer]}>
         <StaticMap
           mapboxApiAccessToken={MAPBOX_TOKEN}
           //mapStyle={BASEMAP.POSITRON}
@@ -173,10 +235,10 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   );
 };
 
-// const getStyles = stylesFactory(() => {
-//   return {
-//     wrapper: css`
-//       position: relative;
-//     `,
-//   };
-// });
+const getStyles = stylesFactory(() => {
+  return {
+    wrapper: css`
+      position: relative;
+    `,
+  };
+});
