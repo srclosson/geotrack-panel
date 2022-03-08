@@ -6,7 +6,7 @@ import { css /*, cx */ } from 'emotion';
 // import { stylesFactory /*, useTheme*/ } from '@grafana/ui';
 import DeckGL from '@deck.gl/react';
 import { LineLayer } from '@deck.gl/layers';
-import { COORDINATE_SYSTEM, RGBAColor } from '@deck.gl/core';
+import { COORDINATE_SYSTEM, Layer, RGBAColor } from '@deck.gl/core';
 
 //import { BASEMAP } from '@deck.gl/carto';
 import StaticMap from 'react-map-gl';
@@ -19,46 +19,12 @@ import { PathLayer } from '@deck.gl/layers';
 export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
   const [showTooltipControls, setShowTooltipControls] = useState(true);
   const [isOpen, setIsOpen] = useState(true);
+  const [useTerrainLayer, setUseTerrainLayer] = useState(true);
   //const theme = useTheme();
   //const styles = getStyles();
+  const displayedLayers: Array<Layer<any, any>> = [];
 
-  const startLngLat = [-119.0381577164, 37.65240240512328];
-  const endLngLat = [-119.0294168628, 37.6427614637];
-  /**
-   * Data format:
-   * [
-   *   {
-   *     waypoints: [
-   *      {coordinates: [-122.3907988, 37.7664413], timestamp: 1554772579000}
-   *      {coordinates: [-122.3908298,37.7667706], timestamp: 1554772579010}
-   *       ...,
-   *      {coordinates: [-122.4485672, 37.8040182], timestamp: 1554772580200}
-   *     ]
-   *   }
-   * ]
-   */
-
-  const pathData = [
-    {
-      path: [startLngLat, endLngLat],
-    },
-  ];
-
-  const pathLayer = new PathLayer({
-    id: 'trips-layer',
-    data: pathData,
-    // getPath: (d) => d.waypoints.map((p) => p.coordinates),
-    // deduct start timestamp from each data point to avoid overflow
-    getColor: [253, 128, 93],
-    opacity: 0.8,
-    widthMinPixels: 20,
-    // rounded: true,
-    // fadeTrail: true,
-    // trailLength: 200,
-    // currentTime: 100,
-  });
-
-  // Viewport settings
+  // #TODO: we should to center of the concentrations of points
   const INITIAL_VIEW_STATE = {
     latitude: 37.6511,
     longitude: -119.0268,
@@ -76,17 +42,6 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     offset: -10000,
   };
 
-  const terrainLayer = new TerrainLayer({
-    id: 'terrain',
-    minZoom: 11,
-    //maxZoom: 23,
-    elevationDecoder: ELEVATION_DECODER,
-    elevationData: TERRAIN_IMAGE,
-    texture: SURFACE_IMAGE,
-    wireframe: false,
-    color: [255, 255, 255],
-  });
-
   // const hexLayer = new HexagonLayer({
   //   id: 'hexagon-layer',
   //   data,
@@ -98,6 +53,9 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
 
   //   }
   // });
+  console.log(`🚀 ~ data`, data);
+
+  if (data?.series.length == 0) return null;
   const lat = data.series[0].fields[1].values.toArray();
   const latTime = data.series[0].fields[0].values.toArray();
   const lon = data.series[1].fields[1].values.toArray();
@@ -121,8 +79,21 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     });
   }
 
-  console.log('linelayerdata', lineLayerData);
-  const lineLayer = new LineLayer({
+  if (useTerrainLayer) {
+    const terrainLayer = new TerrainLayer({
+      id: 'terrain',
+      minZoom: 11,
+      //maxZoom: 23,
+      elevationDecoder: ELEVATION_DECODER,
+      elevationData: TERRAIN_IMAGE,
+      texture: SURFACE_IMAGE,
+      wireframe: false,
+      color: [255, 255, 255],
+    });
+    displayedLayers.push(terrainLayer);
+  }
+
+  const lineLayer: LineLayer<any, any> = new LineLayer({
     id: 'line-layer',
     data: lineLayerData,
     coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
@@ -136,10 +107,11 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     },
   });
 
+  displayedLayers.push(lineLayer);
   console.log('we got data', data);
   return (
     <div>
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer, lineLayer]}>
+      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[...displayedLayers]}>
         <StaticMap
           mapboxApiAccessToken={MAPBOX_TOKEN}
           //mapStyle={BASEMAP.POSITRON}

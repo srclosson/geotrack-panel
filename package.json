@@ -29,5 +29,8 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "dependencies": {
+    "turf": "^3.0.14"
   }
 }
