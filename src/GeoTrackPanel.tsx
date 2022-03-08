@@ -25,15 +25,6 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   const displayedLayers: Array<Layer<any, any>> = [];
 
   // #TODO: we should to center of the concentrations of points
-  const INITIAL_VIEW_STATE = {
-    latitude: 37.6511,
-    longitude: -119.0268,
-    zoom: 17,
-    bearing: 30,
-    pitch: 30,
-    maxZoom: MAX_ZOOM,
-    minZoom: MIN_ZOOM,
-  };
 
   const ELEVATION_DECODER = {
     rScaler: 6553.6,
@@ -102,15 +93,25 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     getTargetPosition: (d: any) => d.to.coordinates,
     getColor: (d: any) => {
       const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
-      console.log('colour', d, result);
       return result;
     },
   });
 
+  const INITIAL_VIEW_STATE = {
+    latitude: lineLayerData?.[0]?.from.coordinates[0] ?? 0,
+    longitude: lineLayerData?.[0]?.from.coordinates[1] ?? 0,
+    zoom: 15,
+    bearing: 30,
+    pitch: 30,
+    maxZoom: MAX_ZOOM,
+    minZoom: MIN_ZOOM,
+  };
+  console.log(`🚀 ~ lineLayerData?.[0]?.from.coordinates[0]`, lineLayerData?.[0]?.from.coordinates[0]);
+
   displayedLayers.push(lineLayer);
   console.log('we got data', data);
   return (
-    <div>
+    <div className="position: absolute; width: 100%">
       <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[...displayedLayers]}>
         <StaticMap
           mapboxApiAccessToken={MAPBOX_TOKEN}
