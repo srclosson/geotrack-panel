@@ -1,0 +1,35 @@
+{
+    "mapboxApiToken": "pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw",
+    "initialViewState": {
+      "latitude": 4.328883333, 
+      "longitude": -76.087816667,
+      "zoom": 10,
+      "bearing": 0,
+      "pitch": 0,
+      "maxZoom": 19,
+      "minZoom": 1
+    },
+    "layers": [
+    {
+      "type": "LineLayer",
+      "id": "paraglide-layer",
+      "color": [255, 0, 0],
+      "getWidth": 5,
+      "dataMapping": {
+        "latitude": "A",
+        "longitude": "B",
+        "elevation": "C"
+      }
+    },
+    {
+      "type": "LineLayer",
+      "id": "squamish-layer",
+      "color": [0, 255, 0],
+      "getWidth": 5,
+      "dataMapping": {
+        "latitude": "F",
+        "longitude": "E",
+        "elevation": "G"
+      }
+    }]
+  }

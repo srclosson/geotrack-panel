@@ -1,0 +1,59 @@
+{
+    "mapboxApiToken": "pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw",
+    "initialViewState": {
+      "latitude": 4.328883333, 
+      "longitude": -76.087816667,
+      "zoom": 10,
+      "bearing": 0,
+      "pitch": 0,
+      "maxZoom": 19,
+      "minZoom": 1
+    },
+    "baseLayer": {
+      "version": 8,
+      "sources": {
+        "stamen-tiles": {
+          "type": "raster",
+          "tiles": [
+            "http://a.tile.osm.org/{z}/{x}/{y}.png",
+            "http://b.tile.osm.org/{z}/{x}/{y}.png",
+            "http://c.tile.osm.org/{z}/{x}/{y}.png"
+          ],
+          "tileSize": 256,
+          "attribution": "Map tiles by <a href=\"http://stamen.com\">Stamen Design</a>, under <a href=\"http://creativecommons.org/licenses/by/3.0\"> CC BY 3.0</a>. Data by <a href=\"http://openstreetmap.org\">OpenStreetMap</a>, under <a href=\"http://www.openstreetmap.org/copyright\"ODbL</a>"
+        }
+      },
+      "layers": [
+        {
+          "id": "stamen-tiles",
+          "type": "raster",
+          "source": "stamen-tiles",
+          "minzoom": 1,
+          "maxzoom": 18
+        }
+      ]
+    },
+    "layers": [
+    {
+      "type": "LineLayer",
+      "id": "paraglide-layer",
+      "color": [255, 0, 0],
+      "getWidth": 5,
+      "dataMapping": {
+        "latitude": "A",
+        "longitude": "B",
+        "elevation": "C"
+      }
+    },
+    {
+      "type": "LineLayer",
+      "id": "squamish-layer",
+      "color": [0, 255, 0],
+      "getWidth": 5,
+      "dataMapping": {
+        "latitude": "F",
+        "longitude": "E",
+        "elevation": "G"
+      }
+    }]
+  }

@@ -10,80 +10,16 @@ import StaticMap from 'react-map-gl';
 import { TerrainLayer } from '@deck.gl/geo-layers';
 import { stylesFactory } from '@grafana/ui';
 import { RGBAColor } from '@deck.gl/core';
-// import { Position } from 'deck.gl';
-//import { DataFrame } from '@grafana/data';
-
-const BASEMAP_TILE_SOURCE_NAME = 'simple-tiles';
-const BASEMAP_TILE_SERVERS = [
-  // 'http://a.tile.osm.org/{z}/{x}/{y}.png',
-  // 'http://b.tile.osm.org/{z}/{x}/{y}.png',
-  // 'http://c.tile.osm.org/{z}/{x}/{y}.png',
-  '//stamen-tiles-a.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg',
-  '//stamen-tiles-b.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg',
-  '//stamen-tiles-c.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg',
-];
-const BASEMAP_ATTRIBUTION = `Map tiles by <a href="http://stamen.com">Stamen Design</a>, under
-<a href="http://creativecommons.org/licenses/by/3.0"> CC BY 3.0</a>. Data by
-<a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">
-ODbL</a>.`.replace(/\n/gm, '');
-const COMMON_LAYER_CONFIG = {
-  minZoom: 2,
-  maxZoom: 17, // New data will be requested until this level
-  pixelScaleFactor: 8,
-  tileSize: 256,
-  isTms: true,
-  topoLayerClusteringSwithLevel: 13,
-  maxVisibleRasterLayers: 3,
-  maxConfigurableLayers: 26,
-};
-const MAP_CONFIG = {
-  MIN_ZOOM: 1,
-  MAX_ZOOM: 18,
-  INITIAL_ZOOM: 9,
-  SHOW_TILE_BOUNDARIES: false,
-  DRAG_ROTATE: false,
-  ZOOM_NO_DATA: 2,
-  SEARCH_DEFAULT_ZOOM: 14,
-};
-
-const MAPBOX_BASE_LAYER = {
-  version: 8,
-  sources: {
-    [BASEMAP_TILE_SOURCE_NAME]: {
-      type: 'raster',
-      tiles: BASEMAP_TILE_SERVERS,
-      tileSize: COMMON_LAYER_CONFIG.tileSize,
-      attribution: BASEMAP_ATTRIBUTION,
-    },
-  },
-  layers: [
-    {
-      id: BASEMAP_TILE_SOURCE_NAME,
-      type: 'raster',
-      source: BASEMAP_TILE_SOURCE_NAME,
-      minzoom: MAP_CONFIG.MIN_ZOOM,
-      maxzoom: MAP_CONFIG.MAX_ZOOM,
-    },
-  ],
-};
+import { parseConfigJson } from 'common';
 
 interface Props extends PanelProps<Options> {}
 
 export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
   //const theme = useTheme();
   const styles = getStyles();
-  console.log('options', options);
-  let config: any = '';
-  try {
-    config = JSON.parse(options.editor.configJson);
-  } catch (ex) {
-    return <div>Failed to parse config JSON</div>;
-  }
+  const config: any = parseConfigJson(options.editor.configJson);
 
-  console.log("data", data);
-
-  const layers = config.layers.map((l: any) => {
-    console.log('creating l', l);
+  const layers = config?.layers.map((l: any) => {
     switch (l.type) {
       case 'TerrainLayer':
         return new TerrainLayer(l);
@@ -107,27 +43,20 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
             },
           });
         }
-        
+
         const ll = new LineLayer({
           id: l.id,
           data: lineLayerData,
           getWidth: l.getWidth,
-          getSourcePosition: (d: any) => {
-            console.log("d", d, lat, lon, ele);
-            return d.from.coordinates
-          },
+          getSourcePosition: (d: any) => d.from.coordinates,
           getTargetPosition: (d: any) => d.to.coordinates,
-          getColor: (d): RGBAColor => {
-            console.log("d", d);
-            return [140, 140, 0];
-          },
+          getColor: (d): RGBAColor => l.color,
         });
         return ll;
     }
     return undefined;
   });
 
-  console.log("layers", layers);
   return (
     <div
       className={cx(
@@ -139,11 +68,17 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
       )}
     >
       <DeckGL initialViewState={config.initialViewState} controller={true} layers={layers}>
-        <StaticMap
-          mapboxApiAccessToken={config.mapboxApiToken}
-          //mapStyle={BASEMAP.POSITRON}
-          mapStyle={MAPBOX_BASE_LAYER}
-        />
+        { config.baseLayer ?
+          <StaticMap
+            mapboxApiAccessToken={config.mapboxApiToken}
+            mapStyle={config.baseLayer}
+          />
+          :
+          <StaticMap
+            mapboxApiAccessToken={config.mapboxApiToken}
+          />
+        }
+        
       </DeckGL>
     </div>
   );

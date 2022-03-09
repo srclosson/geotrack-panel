@@ -3,6 +3,7 @@ import { StandardEditorProps } from '@grafana/data';
 import { CodeEditor } from '@grafana/ui';
 import { EditorOptions, defaults } from 'types';
 import ReactJson from 'react-json-view';
+import { parseConfigJson } from 'common';
 //import { Console, Hook, Unhook } from 'console-feed';
 
 export const Editor: React.FC<StandardEditorProps<EditorOptions>> = ({ value, onChange }) => {
@@ -34,7 +35,7 @@ export const Editor: React.FC<StandardEditorProps<EditorOptions>> = ({ value, on
   return (
     <>
       <CodeEditor language="json" width="100%" height="50vh" value={options.configJson} onSave={onSave} />
-      <ReactJson src={JSON.parse(options.configJson)} theme="twilight" />
+      <ReactJson src={parseConfigJson(value.configJson)} theme="twilight" />
     </>
   );
 };
