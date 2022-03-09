@@ -41,12 +41,12 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
             inbound: i - 1,
             outbound: i,
             from: {
-              name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-              coordinates: [lat[i - 1], lon[i - 1], ele[i - 1] + 5],
+              name: `lon: ${lon[i - 1]}, lat: ${lat[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
+              coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + 5],
             },
             to: {
-              name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-              coordinates: [lat[i], lon[i], ele[i] + 5],
+              name: `lon: ${lon[i]}, lat: ${lat[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
+              coordinates: [lon[i], lat[i], ele[i] + 5],
             },
           });
           if (!initialLat) initialLat = lon[i - 1];
