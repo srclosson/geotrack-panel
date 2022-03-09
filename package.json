@@ -25,7 +25,8 @@
     "react-map-gl": "6.1.19",
     "react-scripts": "5.0.0",
     "@deck.gl/geo-layers": "8.7.0",
-    "@deck.gl/aggregation-layers": "8.7.0"
+    "@deck.gl/aggregation-layers": "8.7.0",
+    "react-json-view": "1.21.3"
   },
   "engines": {
     "node": ">=14"

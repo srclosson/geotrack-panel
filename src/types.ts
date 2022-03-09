@@ -1,7 +1,19 @@
-type SeriesSize = 'sm' | 'md' | 'lg';
+const defaultConfigJson = `{
 
-export interface SimpleOptions {
-  text: string;
-  showSeriesCount: boolean;
-  seriesCountSize: SeriesSize;
+}`;
+
+export interface EditorOptions {
+  configJson: string;
 }
+
+export interface Options {
+  editor: EditorOptions;
+}
+
+export const defaultsEditor: EditorOptions = {
+  configJson: defaultConfigJson,
+};
+
+export const defaults: Options = {
+  editor: defaultsEditor,
+};
