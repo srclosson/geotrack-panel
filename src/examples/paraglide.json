@@ -1,13 +1,13 @@
 {
   "mapboxApiToken": "pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw",
   "initialViewState": {
-    "latitude": 4.3792,
-    "longitude": -76.094416667,
+    "latitude": 4.328883333, 
+    "longitude": -76.087816667,
     "zoom": 10,
     "bearing": 0,
     "pitch": 0,
     "maxZoom": 19,
-    "minZoom": 2
+    "minZoom": 1
   },
   "layers": [{
     "type": "TerrainLayer",
@@ -15,20 +15,24 @@
     "minZoom": 11,
     "maxZoom": 23,
     "elevationDecoder": {
-    "rScaler": 6553.6,
-    "gScaler": 25.6,
-    "bScaler": 0.1,
-    "offset": -10000
+      "rScaler": 6553.6,
+      "gScaler": 25.6,
+      "bScaler": 0.1,
+      "offset": -10000
     },
-    "elevationData": "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw}",
-    "texture": "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw}",
+    "elevationData": "https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw",
+    "texture": "https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw",
     "wireframe": false,
     "color": [255, 255, 255]
   }, 
   {
     "type": "LineLayer",
     "id": "line-layer",
-    "coordinateSystem": "COORDINATE_SYSTEM.LNGLAT",
-    "getWidth": 5
+    "getWidth": 5,
+    "dataMapping": {
+      "latitude": "A",
+      "longitude": "B",
+      "elevation": "C"
+    }
   }]
 }
