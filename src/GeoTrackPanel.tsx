@@ -1,22 +1,140 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
+import { Button, Card, Collapse, Select } from '@grafana/ui';
 import { SimpleOptions } from 'types';
-// import { css /*, cx */ } from 'emotion';
+import { css /*, cx */ } from 'emotion';
 // import { stylesFactory /*, useTheme*/ } from '@grafana/ui';
 import DeckGL from '@deck.gl/react';
 import { LineLayer } from '@deck.gl/layers';
-import { COORDINATE_SYSTEM, RGBAColor } from '@deck.gl/core';
+import { COORDINATE_SYSTEM, Layer, RGBAColor } from '@deck.gl/core';
 
 //import { BASEMAP } from '@deck.gl/carto';
 import StaticMap from 'react-map-gl';
 import { TerrainLayer } from '@deck.gl/geo-layers';
+import { MapControls } from 'components/MapControls';
 // import { Position } from 'deck.gl';
 //import { DataFrame } from '@grafana/data';
+import { PathLayer } from '@deck.gl/layers';
 
-const MAX_ZOOM = 19;
-const MIN_ZOOM = 2;
+export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
+  const [showTooltipControls, setShowTooltipControls] = useState(true);
+  const [useTerrainLayer, setUseTerrainLayer] = useState(true);
+  //const theme = useTheme();
+  //const styles = getStyles();
+  const displayedLayers: Array<Layer<any, any>> = [];
 
-const MAPBOX_TOKEN = 'pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw';
+  // #TODO: we should to center of the concentrations of points
+
+  const ELEVATION_DECODER = {
+    rScaler: 6553.6,
+    gScaler: 25.6,
+    bScaler: 0.1,
+    offset: -10000,
+  };
+
+  // const hexLayer = new HexagonLayer({
+  //   id: 'hexagon-layer',
+  //   data,
+  //   pickable: true,
+  //   extruded: true,
+  //   radius: 200,
+  //   elevationScale: 4,
+  //   getPosition: d => {
+
+  //   }
+  // });
+  console.log(`🚀 ~ data`, data);
+
+  if (data?.series.length == 0) return null;
+  const lat = data.series[0].fields[1].values.toArray();
+  const latTime = data.series[0].fields[0].values.toArray();
+  const lon = data.series[1].fields[1].values.toArray();
+  const ele = data.series[2].fields[1].values.toArray();
+  const hr = data.series[3].fields[1].values.toArray();
+  let lineLayerData = [];
+  for (let i = 1; i <= lat.length - 1; i++) {
+    lineLayerData.push({
+      inbound: i - 1,
+      outbound: i,
+      from: {
+        name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
+        coordinates: [lat[i - 1], lon[i - 1], ele[i - 1]],
+        hr: hr[i - 1],
+      },
+      to: {
+        name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
+        coordinates: [lat[i], lon[i], ele[i]],
+        hr: hr[i],
+      },
+    });
+  }
+
+  if (useTerrainLayer) {
+    const terrainLayer = new TerrainLayer({
+      id: 'terrain',
+      minZoom: 1,
+      //maxZoom: 23,
+      elevationDecoder: ELEVATION_DECODER,
+      elevationData: TERRAIN_IMAGE,
+      texture: SURFACE_IMAGE,
+      wireframe: false,
+      color: [255, 255, 255],
+    });
+    displayedLayers.push(terrainLayer);
+  }
+
+  const lineLayer: LineLayer<any, any> = new LineLayer({
+    id: 'line-layer',
+    data: lineLayerData,
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+    getWidth: 5,
+    getSourcePosition: (d: any) => d.from.coordinates,
+    getTargetPosition: (d: any) => d.to.coordinates,
+    getColor: (d: any) => {
+      const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
+      return result;
+    },
+  });
+
+  const INITIAL_VIEW_STATE = {
+    latitude: lineLayerData?.[0]?.from.coordinates[0] ?? 0,
+    longitude: lineLayerData?.[0]?.from.coordinates[1] ?? 0,
+    zoom: 15,
+    bearing: 30,
+    pitch: 30,
+    maxZoom: MAX_ZOOM,
+    minZoom: MIN_ZOOM,
+  };
+
+  displayedLayers.push(lineLayer);
+  console.log('we got data', data);
+  return (
+    <div
+      className={css`
+        position: relative;
+        width: 100%;
+        height: 100%;
+      `}
+    >
+      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[...displayedLayers]}>
+        <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={MAPBOX_BASE_LAYER} />
+        <MapControls
+          toggleTerrain={() => {
+            setUseTerrainLayer(!useTerrainLayer);
+          }}
+        />
+      </DeckGL>
+    </div>
+  );
+};
+
+// const getStyles = stylesFactory(() => {
+//   return {
+//     wrapper: css`
+//       position: relative;
+//     `,
+//   };
+// });
 
 const BASEMAP_TILE_SOURCE_NAME = 'simple-tiles';
 const BASEMAP_TILE_SERVERS = [
@@ -74,109 +192,10 @@ const MAPBOX_BASE_LAYER = {
 
 interface Props extends PanelProps<SimpleOptions> {}
 
+const MAPBOX_TOKEN = 'pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw';
+
 const TERRAIN_IMAGE = `https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=${MAPBOX_TOKEN}`;
 const SURFACE_IMAGE = `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=${MAPBOX_TOKEN}`;
 
-export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
-  //const theme = useTheme();
-  //const styles = getStyles();
-
-  // Viewport settings
-  const INITIAL_VIEW_STATE = {
-    latitude: 37.6493,
-    longitude: -122.5233,
-    zoom: 5,
-    bearing: 0,
-    pitch: 0,
-    maxZoom: MAX_ZOOM,
-    minZoom: MIN_ZOOM,
-  };
-
-  const ELEVATION_DECODER = {
-    rScaler: 6553.6,
-    gScaler: 25.6,
-    bScaler: 0.1,
-    offset: -10000,
-  };
-
-  const terrainLayer = new TerrainLayer({
-    id: 'terrain',
-    minZoom: 11,
-    //maxZoom: 23,
-    elevationDecoder: ELEVATION_DECODER,
-    elevationData: TERRAIN_IMAGE,
-    texture: SURFACE_IMAGE,
-    wireframe: false,
-    color: [255, 255, 255],
-  });
-
-  // const hexLayer = new HexagonLayer({
-  //   id: 'hexagon-layer',
-  //   data,
-  //   pickable: true,
-  //   extruded: true,
-  //   radius: 200,
-  //   elevationScale: 4,
-  //   getPosition: d => {
-
-  //   }
-  // });
-
-  const lat = data.series[0].fields[1].values.toArray();
-  const latTime = data.series[0].fields[0].values.toArray();
-  const lon = data.series[1].fields[1].values.toArray();
-  const ele = data.series[2].fields[1].values.toArray();
-  const hr = data.series[3].fields[1].values.toArray();
-  let lineLayerData = [];
-  for (let i = 1; i <= lat.length - 1; i++) {
-    lineLayerData.push({
-      inbound: i - 1,
-      outbound: i,
-      from: {
-        name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-        coordinates: [lat[i - 1], lon[i - 1], ele[i - 1]],
-        hr: hr[i - 1],
-      },
-      to: {
-        name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-        coordinates: [lat[i], lon[i], ele[i]],
-        hr: hr[i],
-      },
-    });
-  }
-
-  console.log('linelayerdata', lineLayerData);
-  const lineLayer = new LineLayer({
-    id: 'line-layer',
-    data: lineLayerData,
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-    getWidth: 5,
-    getSourcePosition: (d: any) => d.from.coordinates,
-    getTargetPosition: (d: any) => d.to.coordinates,
-    getColor: (d: any) => {
-      const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
-      console.log('colour', d, result);
-      return result;
-    },
-  });
-
-  return (
-    <div>
-      <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[terrainLayer, lineLayer]}>
-        <StaticMap
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          //mapStyle={BASEMAP.POSITRON}
-          mapStyle={MAPBOX_BASE_LAYER}
-        />
-      </DeckGL>
-    </div>
-  );
-};
-
-// const getStyles = stylesFactory(() => {
-//   return {
-//     wrapper: css`
-//       position: relative;
-//     `,
-//   };
-// });
+const MAX_ZOOM = 19;
+const MIN_ZOOM = 2;
