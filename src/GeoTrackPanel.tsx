@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { Options } from 'types';
 import { css, cx } from 'emotion';
@@ -11,6 +11,7 @@ import { TerrainLayer } from '@deck.gl/geo-layers';
 import { stylesFactory } from '@grafana/ui';
 import { RGBAColor } from '@deck.gl/core';
 import { parseConfigJson } from 'common';
+import { MapControls } from './components/MapControls';
 
 interface Props extends PanelProps<Options> {}
 
@@ -18,10 +19,16 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   //const theme = useTheme();
   const styles = getStyles();
   const config: any = parseConfigJson(options.editor.configJson);
+  const [showTerrainLayer, setShowTerrainLayer] = useState(true);
+  console.log(`🚀 ~ config`, config);
+
+  let initialLat: number | undefined = undefined;
+  let initialLng: number | undefined = undefined;
 
   const layers = config?.layers.map((l: any) => {
     switch (l.type) {
       case 'TerrainLayer':
+        if (!showTerrainLayer) return undefined;
         return new TerrainLayer(l);
       case 'LineLayer':
         const lineLayerData: any[] = [];
@@ -35,13 +42,15 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
             outbound: i,
             from: {
               name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-              coordinates: [lat[i - 1], lon[i - 1], ele[i - 1]],
+              coordinates: [lat[i - 1], lon[i - 1], ele[i - 1] + 5],
             },
             to: {
               name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-              coordinates: [lat[i], lon[i], ele[i]],
+              coordinates: [lat[i], lon[i], ele[i] + 5],
             },
           });
+          if (!initialLat) initialLat = lon[i - 1];
+          if (!initialLng) initialLng = lat[i - 1];
         }
 
         const ll = new LineLayer({
@@ -50,12 +59,22 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
           getWidth: l.getWidth,
           getSourcePosition: (d: any) => d.from.coordinates,
           getTargetPosition: (d: any) => d.to.coordinates,
-          getColor: (d): RGBAColor => l.color,
+          getColor: (d: any): RGBAColor => [d.from.coordinates[2], 100, 0],
         });
         return ll;
     }
     return undefined;
   });
+
+  const initialViewState = config.initialViewState ?? {
+    latitude: initialLat ?? 0,
+    longitude: initialLng ?? 0,
+    zoom: 14,
+    bearing: 20,
+    pitch: 20,
+    maxZoom: 19,
+    minZoom: 1,
+  };
 
   return (
     <div
@@ -67,18 +86,26 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         `
       )}
     >
-      <DeckGL initialViewState={config.initialViewState} controller={true} layers={layers}>
-        { config.baseLayer ?
-          <StaticMap
-            mapboxApiAccessToken={config.mapboxApiToken}
-            mapStyle={config.baseLayer}
-          />
-          :
-          <StaticMap
-            mapboxApiAccessToken={config.mapboxApiToken}
-          />
-        }
-        
+      <DeckGL initialViewState={initialViewState} controller={true} layers={layers}>
+        {config.baseLayer ? (
+          <>
+            <StaticMap mapboxApiAccessToken={config.mapboxApiToken} mapStyle={config.baseLayer} />
+            <MapControls
+              toggleTerrain={() => {
+                setShowTerrainLayer(!showTerrainLayer);
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <StaticMap mapboxApiAccessToken={config.mapboxApiToken} />
+            <MapControls
+              toggleTerrain={() => {
+                setShowTerrainLayer(!showTerrainLayer);
+              }}
+            />
+          </>
+        )}
       </DeckGL>
     </div>
   );
