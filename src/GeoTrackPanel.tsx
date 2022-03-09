@@ -83,9 +83,9 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
 
   // Viewport settings
   const INITIAL_VIEW_STATE = {
-    latitude: 37.6493,
-    longitude: -122.5233,
-    zoom: 5,
+    latitude: 4.3792,
+    longitude: -76.094416667,
+    zoom: 10,
     bearing: 0,
     pitch: 0,
     maxZoom: MAX_ZOOM,
@@ -110,18 +110,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     color: [255, 255, 255],
   });
 
-  // const hexLayer = new HexagonLayer({
-  //   id: 'hexagon-layer',
-  //   data,
-  //   pickable: true,
-  //   extruded: true,
-  //   radius: 200,
-  //   elevationScale: 4,
-  //   getPosition: d => {
-
-  //   }
-  // });
-
+  console.log("data", data);
   const lat = data.series[0].fields[1].values.toArray();
   const latTime = data.series[0].fields[0].values.toArray();
   const lon = data.series[1].fields[1].values.toArray();
@@ -154,8 +143,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     getSourcePosition: (d: any) => d.from.coordinates,
     getTargetPosition: (d: any) => d.to.coordinates,
     getColor: (d: any) => {
-      const result: RGBAColor = [((d.from.hr - 140) / (190 - 140)) * 255, 140, 0];
-      console.log('colour', d, result);
+      const result: RGBAColor = [255, 0, 0];
       return result;
     },
   });

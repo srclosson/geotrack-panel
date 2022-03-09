@@ -1,6 +1,6 @@
 import { PanelPlugin } from '@grafana/data';
 import { SimpleOptions } from './types';
-import { GeotrackPanel } from './GeotrackPanel';
+import { GeotrackPanel } from './GeoTrackPanel';
 
 export const plugin = new PanelPlugin<SimpleOptions>(GeotrackPanel).setPanelOptions((builder) => {
   return builder
