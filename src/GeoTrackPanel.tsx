@@ -18,7 +18,6 @@ import { PathLayer } from '@deck.gl/layers';
 
 export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
   const [showTooltipControls, setShowTooltipControls] = useState(true);
-  const [isOpen, setIsOpen] = useState(true);
   const [useTerrainLayer, setUseTerrainLayer] = useState(true);
   //const theme = useTheme();
   //const styles = getStyles();
@@ -73,7 +72,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   if (useTerrainLayer) {
     const terrainLayer = new TerrainLayer({
       id: 'terrain',
-      minZoom: 11,
+      minZoom: 1,
       //maxZoom: 23,
       elevationDecoder: ELEVATION_DECODER,
       elevationData: TERRAIN_IMAGE,
@@ -106,19 +105,24 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     maxZoom: MAX_ZOOM,
     minZoom: MIN_ZOOM,
   };
-  console.log(`🚀 ~ lineLayerData?.[0]?.from.coordinates[0]`, lineLayerData?.[0]?.from.coordinates[0]);
 
   displayedLayers.push(lineLayer);
   console.log('we got data', data);
   return (
-    <div className="position: absolute; width: 100%">
+    <div
+      className={css`
+        position: relative;
+        width: 100%;
+        height: 100%;
+      `}
+    >
       <DeckGL initialViewState={INITIAL_VIEW_STATE} controller={true} layers={[...displayedLayers]}>
-        <StaticMap
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          //mapStyle={BASEMAP.POSITRON}
-          mapStyle={MAPBOX_BASE_LAYER}
+        <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={MAPBOX_BASE_LAYER} />
+        <MapControls
+          toggleTerrain={() => {
+            setUseTerrainLayer(!useTerrainLayer);
+          }}
         />
-        <MapControls />
       </DeckGL>
     </div>
   );
