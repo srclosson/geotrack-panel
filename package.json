@@ -13,22 +13,25 @@
   "author": "Stephanie Closson",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@danmarshall/deckgl-typings": "4.9.15",
+    "@deck.gl/aggregation-layers": "8.7.0",
+    "@deck.gl/carto": "8.7.0",
+    "@deck.gl/geo-layers": "8.7.0",
+    "@deck.gl/layers": "8.7.0",
+    "@deck.gl/react": "8.7.0",
     "@grafana/data": "latest",
     "@grafana/toolkit": "latest",
-    "@grafana/ui": "latest",
-    "emotion": "10.0.27",
+    "@grafana/ui": "^8.4.3",
     "deck.gl": "8.7.0",
-    "@deck.gl/react": "8.7.0",
-    "@deck.gl/layers": "8.7.0",
-    "@danmarshall/deckgl-typings": "4.9.15",
-    "@deck.gl/carto": "8.7.0",
+    "emotion": "10.0.27",
     "react-map-gl": "6.1.19",
     "react-scripts": "5.0.0",
-    "@deck.gl/geo-layers": "8.7.0",
-    "@deck.gl/aggregation-layers": "8.7.0",
     "react-json-view": "1.21.3"
   },
   "engines": {
     "node": ">=14"
+  },
+  "dependencies": {
+    "turf": "^3.0.14"
   }
 }
