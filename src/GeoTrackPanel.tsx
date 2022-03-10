@@ -23,31 +23,25 @@ function readTimePosData(series: DataFrame[], l: any): any[] {
   var lon: number[] = [];
   var ele: number[] = [];
 
-  // for (var s of series) {
-  //   if lat.length == 0 { lat = s.fields.find((f) => l.dataMapping.latitude === f.refId!)?.fields[1].values.toArray() || []  };
-  //   if latTime.length == 0 { latTime = s.fields.find((f) => l.dataMapping.latitude === f.refId!)?.fields[0].values.toArray() || []  };
-  //   if lon.length == 0 { lon = s.fields.find((f) => l.dataMapping.longitude === f.refId!)?.fields[1].values.toArray() || []  };
-  //   if ele.length == 0 { ele = s.fields.find((f) => l.dataMapping.elevation === f.refId!)?.fields[1].values.toArray() || []  };
-  // }
-
+  // ugly but functional
   for (var s of series) {
-    console.log(s);
-    if lat.length == 0 { lat = s.fields.find((field) => field.name === l.dataMapping.latitude)?.values.toArray() || [] };
-    if lat.length == 0 { 
+    // console.log(s);
+    if (lat.length == 0) { lat = s.fields.find((field) => field.name === l.dataMapping.latitude)?.values.toArray() || [] };
+    if (lat.length == 0) { 
       if (s.name === l.dataMapping.latitude) {
         lat = s.fields[1].values.toArray()
       }
     }
 
-    if lon.length == 0 { lon = s.fields.find((field) => field.name === l.dataMapping.longitude)?.values.toArray() || [] };
-    if lon.length == 0 { 
+    if (lon.length == 0) { lon = s.fields.find((field) => field.name === l.dataMapping.longitude)?.values.toArray() || [] };
+    if (lon.length == 0) { 
       if (s.name === l.dataMapping.longitude) {
         lon = s.fields[1].values.toArray()
       }
     }
     
-    if ele.length == 0 { ele = s.fields.find((field) => field.name === l.dataMapping.elevation)?.values.toArray() || [] };
-    if ele.length == 0 { 
+    if (ele.length == 0) { ele = s.fields.find((field) => field.name === l.dataMapping.elevation)?.values.toArray() || [] };
+    if (ele.length == 0) { 
       if (s.name === l.dataMapping.elevation) {
         ele = s.fields[1].values.toArray()
       }

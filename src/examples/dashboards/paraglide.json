@@ -1,0 +1,585 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 3,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 14,
+      "panels": [],
+      "title": "From Live GPS Feed",
+      "type": "row"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": null
+              },
+              {
+                "color": "dark-green",
+                "value": 80
+              },
+              {
+                "color": "yellow",
+                "value": 90
+              },
+              {
+                "color": "orange",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 105
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 13,
+        "x": 0,
+        "y": 1
+      },
+      "id": 15,
+      "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "xyz"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "bpm",
+                  "fixed": "dark-green"
+                },
+                "opacity": 0.9,
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                },
+                "size": {
+                  "fixed": 5,
+                  "max": 15,
+                  "min": 2
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetX": 0,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
+              }
+            },
+            "location": {
+              "mode": "auto"
+            },
+            "name": "Layer 3",
+            "tooltip": true,
+            "type": "markers"
+          }
+        ],
+        "view": {
+          "id": "coords",
+          "lat": 4.246232,
+          "lon": -76.142569,
+          "zoom": 11.03
+        }
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_bpm",
+          "interval": "",
+          "legendFormat": "bpm",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_ele",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ele",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_lat",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "lat",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_lon",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "lon",
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_ts",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ts",
+          "refId": "E"
+        }
+      ],
+      "title": "2D",
+      "transformations": [
+        {
+          "id": "prepareTimeSeries",
+          "options": {
+            "format": "wide"
+          }
+        }
+      ],
+      "type": "geomap"
+    },
+    {
+      "gridPos": {
+        "h": 17,
+        "w": 11,
+        "x": 13,
+        "y": 1
+      },
+      "id": 16,
+      "options": {
+        "altitudeColumnName": "ele",
+        "editor": {
+          "configJson": "{\n  \"mapboxApiToken\": \"pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n  \"initialViewState\": {\n    \"latitude\": 4.328883333, \n    \"longitude\": -76.087816667,\n    \"zoom\": 10,\n    \"bearing\": 0,\n    \"pitch\": 0,\n    \"maxZoom\": 19,\n    \"minZoom\": 1\n  },\n  \"baseLayer\": {\n    \"version\": 8,\n    \"sources\": {\n      \"stamen-tiles\": {\n        \"type\": \"raster\",\n        \"tiles\": [\n          \"//stamen-tiles-a.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\",\n          \"//stamen-tiles-b.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\",\n          \"//stamen-tiles-c.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\"\n        ],\n        \"tileSize\": 256,\n        \"attribution\": \"Map tiles by <a href=\\\"http://stamen.com\\\">Stamen Design</a>, under <a href=\\\"http://creativecommons.org/licenses/by/3.0\\\"> CC BY 3.0</a>. Data by <a href=\\\"http://openstreetmap.org\\\">OpenStreetMap</a>, under <a href=\\\"http://www.openstreetmap.org/copyright\\\"ODbL</a>\"\n      }\n    },\n    \"layers\": [\n      {\n        \"id\": \"stamen-tiles\",\n        \"type\": \"raster\",\n        \"source\": \"stamen-tiles\",\n        \"minzoom\": 1,\n        \"maxzoom\": 18\n      }\n    ]\n  },\n  \"layers\": [{\n    \"type\": \"TerrainLayer\",\n    \"id\": \"terrain\",\n    \"minZoom\": 11,\n    \"maxZoom\": 23,\n    \"elevationDecoder\": {\n      \"rScaler\": 6553.6,\n      \"gScaler\": 25.6,\n      \"bScaler\": 0.1,\n      \"offset\": -10000\n    },\n    \"elevationData\": \"https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n    \"texture\": \"https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n    \"wireframe\": false,\n    \"color\": [255, 255, 255]\n  }, \n  {\n    \"type\": \"LineLayer\",\n    \"id\": \"paraglide-layer\",\n    \"color\": [255, 0, 0],\n    \"getWidth\": 5,\n    \"dataMapping\": {\n      \"latitude\": \"lat\",\n      \"longitude\": \"lon\",\n      \"elevation\": \"ele\"\n    }\n  }]\n}",
+          "editor": {
+            "configJson": "{\n\n}"
+          }
+        },
+        "hrColumnName": "bpm",
+        "latitudeColumnName": "lat",
+        "longitudeColumnName": "lon",
+        "seriesCountSize": "lg",
+        "showSeriesCount": true,
+        "timeColumnName": "ts"
+      },
+      "pluginVersion": "8.4.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_bpm",
+          "interval": "",
+          "legendFormat": "bpm",
+          "refId": "bpm"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_ele",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ele",
+          "refId": "ele"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_lat",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "lat",
+          "refId": "lat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_lon",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "lon",
+          "refId": "lon"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "2uZeQpY7k"
+          },
+          "exemplar": true,
+          "expr": "paraglide_ts",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "ts",
+          "refId": "ts"
+        }
+      ],
+      "title": "3D",
+      "transformations": [],
+      "type": "grafana-labs-geotrack-panel"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 11,
+      "panels": [
+        {
+          "datasource": {
+            "type": "input",
+            "uid": "gE1DsYLnz"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "dark-blue",
+                    "value": null
+                  },
+                  {
+                    "color": "dark-green",
+                    "value": 80
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 90
+                  },
+                  {
+                    "color": "orange",
+                    "value": 100
+                  },
+                  {
+                    "color": "red",
+                    "value": 105
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 17,
+            "w": 13,
+            "x": 0,
+            "y": 19
+          },
+          "id": 9,
+          "options": {
+            "basemap": {
+              "config": {},
+              "name": "Layer 0",
+              "type": "xyz"
+            },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showScale": false,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "showLegend": true,
+                  "style": {
+                    "color": {
+                      "field": "bpm",
+                      "fixed": "dark-green"
+                    },
+                    "opacity": 0.9,
+                    "rotation": {
+                      "fixed": 0,
+                      "max": 360,
+                      "min": -360,
+                      "mode": "mod"
+                    },
+                    "size": {
+                      "fixed": 5,
+                      "max": 15,
+                      "min": 2
+                    },
+                    "symbol": {
+                      "fixed": "img/icons/marker/circle.svg",
+                      "mode": "fixed"
+                    },
+                    "textConfig": {
+                      "fontSize": 12,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  }
+                },
+                "location": {
+                  "mode": "auto"
+                },
+                "name": "Layer 3",
+                "tooltip": true,
+                "type": "markers"
+              }
+            ],
+            "view": {
+              "id": "coords",
+              "lat": 4.246232,
+              "lon": -76.142569,
+              "zoom": 11.03
+            }
+          },
+          "pluginVersion": "8.4.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "input",
+                "uid": "gE1DsYLnz"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "2D",
+          "transformations": [
+            {
+              "id": "prepareTimeSeries",
+              "options": {
+                "format": "wide"
+              }
+            }
+          ],
+          "type": "geomap"
+        },
+        {
+          "datasource": {
+            "type": "input",
+            "uid": "gE1DsYLnz"
+          },
+          "gridPos": {
+            "h": 17,
+            "w": 11,
+            "x": 13,
+            "y": 19
+          },
+          "id": 12,
+          "options": {
+            "altitudeColumnName": "ele",
+            "editor": {
+              "configJson": "{\n  \"mapboxApiToken\": \"pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n  \"initialViewState\": {\n    \"latitude\": 4.328883333, \n    \"longitude\": -76.087816667,\n    \"zoom\": 10,\n    \"bearing\": 0,\n    \"pitch\": 0,\n    \"maxZoom\": 19,\n    \"minZoom\": 1\n  },\n  \"baseLayer\": {\n    \"version\": 8,\n    \"sources\": {\n      \"stamen-tiles\": {\n        \"type\": \"raster\",\n        \"tiles\": [\n          \"//stamen-tiles-a.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\",\n          \"//stamen-tiles-b.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\",\n          \"//stamen-tiles-c.a.ssl.fastly.net/terrain/{z}/{x}/{y}.jpg\"\n        ],\n        \"tileSize\": 256,\n        \"attribution\": \"Map tiles by <a href=\\\"http://stamen.com\\\">Stamen Design</a>, under <a href=\\\"http://creativecommons.org/licenses/by/3.0\\\"> CC BY 3.0</a>. Data by <a href=\\\"http://openstreetmap.org\\\">OpenStreetMap</a>, under <a href=\\\"http://www.openstreetmap.org/copyright\\\"ODbL</a>\"\n      }\n    },\n    \"layers\": [\n      {\n        \"id\": \"stamen-tiles\",\n        \"type\": \"raster\",\n        \"source\": \"stamen-tiles\",\n        \"minzoom\": 1,\n        \"maxzoom\": 18\n      }\n    ]\n  },\n  \"layers\": [{\n    \"type\": \"TerrainLayer\",\n    \"id\": \"terrain\",\n    \"minZoom\": 11,\n    \"maxZoom\": 23,\n    \"elevationDecoder\": {\n      \"rScaler\": 6553.6,\n      \"gScaler\": 25.6,\n      \"bScaler\": 0.1,\n      \"offset\": -10000\n    },\n    \"elevationData\": \"https://api.mapbox.com/v4/mapbox.terrain-rgb/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n    \"texture\": \"https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1Ijoic3JjbG9zc29uIiwiYSI6ImNsMGdxamNidDAxOTcza21qOTFwNmRkNGkifQ.u-AcyC1afRBc-Eb-dOZ0iw\",\n    \"wireframe\": false,\n    \"color\": [255, 255, 255]\n  }, \n  {\n    \"type\": \"LineLayer\",\n    \"id\": \"paraglide-layer\",\n    \"color\": [255, 0, 0],\n    \"getWidth\": 5,\n    \"dataMapping\": {\n      \"latitude\": \"lat\",\n      \"longitude\": \"lon\",\n      \"elevation\": \"ele\"\n    }\n  }]\n}",
+              "editor": {
+                "configJson": "{\n\n}"
+              }
+            },
+            "hrColumnName": "bpm",
+            "latitudeColumnName": "lat",
+            "longitudeColumnName": "lon",
+            "seriesCountSize": "lg",
+            "showSeriesCount": true,
+            "text": "Default value of text input option",
+            "timeColumnName": "ts"
+          },
+          "pluginVersion": "8.4.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "input",
+                "uid": "gE1DsYLnz"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "3D",
+          "transformations": [],
+          "type": "grafana-labs-geotrack-panel"
+        },
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          },
+          "id": 4,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "8.4.3",
+          "targets": [
+            {
+              "datasource": {
+                "type": "input",
+                "uid": "gE1DsYLnz"
+              },
+              "refId": "A"
+            }
+          ],
+          "title": "Data",
+          "type": "table"
+        }
+      ],
+      "title": "From Static CSV Data",
+      "type": "row"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 35,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Paragliding Data Explorer",
+  "uid": "_M81n8Lnk",
+  "version": 37,
+  "weekStart": ""
+}
