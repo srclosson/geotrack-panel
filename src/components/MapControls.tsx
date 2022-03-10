@@ -1,8 +1,22 @@
-import { Collapse, Select } from '@grafana/ui';
+import { Collapse, Select, Slider } from '@grafana/ui';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 
-export const MapControls = ({ toggleTerrain }: { toggleTerrain: () => void }) => {
+interface ILabels {
+  onClick: () => void;
+  text: string;
+  isActive: boolean;
+}
+
+export const MapControls = ({
+  labels,
+  elevation,
+  onElevationChange,
+}: {
+  labels: ILabels[];
+  elevation?: number;
+  onElevationChange: (v: number) => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Collapse
@@ -17,10 +31,30 @@ export const MapControls = ({ toggleTerrain }: { toggleTerrain: () => void }) =>
       onToggle={() => setIsOpen(!isOpen)}
       isOpen={isOpen}
     >
-      {/* Add some on click interactions with the map */}
-      <div onClick={toggleTerrain}> Toggle Terrain Layer </div>
-      <div> ASD 1</div>
-      <div> ASD 2</div>
+      {labels.map((label) => {
+        return (
+          <div
+            className={css`
+              font-weight: ${label.isActive ? 'bold' : 'normal'};
+            `}
+            onClick={label.onClick}
+          >
+            {label.text}
+          </div>
+        );
+      })}
+      <Slider
+        included
+        max={200}
+        step={10}
+        min={0}
+        orientation="horizontal"
+        value={elevation ?? 10}
+        onAfterChange={(v) => {
+          if (!v) return;
+          onElevationChange(v);
+        }}
+      />
     </Collapse>
   );
 };
