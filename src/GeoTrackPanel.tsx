@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PanelProps } from '@grafana/data';
+import { PanelProps, DataFrame } from '@grafana/data';
 import { Options } from 'types';
 import { css, cx } from 'emotion';
 import DeckGL from '@deck.gl/react';
@@ -15,15 +15,78 @@ import { MapControls } from './components/MapControls';
 
 interface Props extends PanelProps<Options> {}
 
+function readTimePosData(series: DataFrame[], l: any): any[] {
+  const lineLayerData: any[] = [];
+
+  var lat: number[] = [];
+  // var latTime: number[] = [];
+  var lon: number[] = [];
+  var ele: number[] = [];
+
+  // for (var s of series) {
+  //   if lat.length == 0 { lat = s.fields.find((f) => l.dataMapping.latitude === f.refId!)?.fields[1].values.toArray() || []  };
+  //   if latTime.length == 0 { latTime = s.fields.find((f) => l.dataMapping.latitude === f.refId!)?.fields[0].values.toArray() || []  };
+  //   if lon.length == 0 { lon = s.fields.find((f) => l.dataMapping.longitude === f.refId!)?.fields[1].values.toArray() || []  };
+  //   if ele.length == 0 { ele = s.fields.find((f) => l.dataMapping.elevation === f.refId!)?.fields[1].values.toArray() || []  };
+  // }
+
+  for (var s of series) {
+    console.log(s);
+    if lat.length == 0 { lat = s.fields.find((field) => field.name === l.dataMapping.latitude)?.values.toArray() || [] };
+    if lat.length == 0 { 
+      if (s.name === l.dataMapping.latitude) {
+        lat = s.fields[1].values.toArray()
+      }
+    }
+
+    if lon.length == 0 { lon = s.fields.find((field) => field.name === l.dataMapping.longitude)?.values.toArray() || [] };
+    if lon.length == 0 { 
+      if (s.name === l.dataMapping.longitude) {
+        lon = s.fields[1].values.toArray()
+      }
+    }
+    
+    if ele.length == 0 { ele = s.fields.find((field) => field.name === l.dataMapping.elevation)?.values.toArray() || [] };
+    if ele.length == 0 { 
+      if (s.name === l.dataMapping.elevation) {
+        ele = s.fields[1].values.toArray()
+      }
+    }
+  };
+
+//latTime.length == 0 ||
+  if (lat.length == 0 || lon.length == 0 || ele.length == 0) {
+    console.log("missing required fields");
+    return [];
+  }
+
+  for (let i = 1; i <= lat.length - 1; i++) {
+    lineLayerData.push({
+      inbound: i - 1,
+      outbound: i,
+      from: {
+        name: `lon: ${lon[i - 1]}, lat: ${lat[i - 1]}, ele: ${ele[i - 1]}`,
+        coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + 5],
+      },
+      to: {
+        name: `lon: ${lon[i]}, lat: ${lat[i]}, ele: ${ele[i]}`,
+        coordinates: [lon[i], lat[i], ele[i] + 5],
+      },
+    });
+  }
+
+  return lineLayerData;
+}
+
 export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height }) => {
   //const theme = useTheme();
   const styles = getStyles();
   const config: any = parseConfigJson(options.editor.configJson);
   const [showTerrainLayer, setShowTerrainLayer] = useState(true);
-  console.log(`🚀 ~ config`, config);
+  // console.log(`🚀 ~ config`, config);
 
   let initialLat: number | undefined = undefined;
-  let initialLng: number | undefined = undefined;
+  let initialLon: number | undefined = undefined;
 
   const layers = config?.layers.map((l: any) => {
     switch (l.type) {
@@ -31,27 +94,10 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         if (!showTerrainLayer) return undefined;
         return new TerrainLayer(l);
       case 'LineLayer':
-        const lineLayerData: any[] = [];
-        const lat = data.series.find((s) => l.dataMapping.latitude === s.refId!)?.fields[1].values.toArray() || [];
-        const latTime = data.series.find((s) => l.dataMapping.latitude === s.refId!)?.fields[0].values.toArray() || [];
-        const lon = data.series.find((s) => l.dataMapping.longitude === s.refId!)?.fields[1].values.toArray() || [];
-        const ele = data.series.find((s) => l.dataMapping.elevation === s.refId!)?.fields[1].values.toArray() || [];
-        for (let i = 1; i <= lat.length - 1; i++) {
-          lineLayerData.push({
-            inbound: i - 1,
-            outbound: i,
-            from: {
-              name: `lon: ${lon[i - 1]}, lat: ${lat[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-              coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + 5],
-            },
-            to: {
-              name: `lon: ${lon[i]}, lat: ${lat[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-              coordinates: [lon[i], lat[i], ele[i] + 5],
-            },
-          });
-          if (!initialLat) initialLat = lon[i - 1];
-          if (!initialLng) initialLng = lat[i - 1];
-        }
+        const lineLayerData = readTimePosData(data.series, l);
+
+        if (!initialLon && lineLayerData.length > 0) initialLon = lineLayerData[lineLayerData.length-1].to.coordinates[0];
+        if (!initialLat && lineLayerData.length > 0) initialLat = lineLayerData[lineLayerData.length-1].to.coordinates[1];
 
         const ll = new LineLayer({
           id: l.id,
@@ -63,12 +109,12 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         });
         return ll;
     }
-    return undefined;
+    return [];
   });
 
   const initialViewState = config.initialViewState ?? {
     latitude: initialLat ?? 0,
-    longitude: initialLng ?? 0,
+    longitude: initialLon ?? 0,
     zoom: 14,
     bearing: 20,
     pitch: 20,
