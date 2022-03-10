@@ -4,10 +4,11 @@ import { Options } from 'types';
 import { css, cx } from 'emotion';
 import DeckGL from '@deck.gl/react';
 import { LineLayer } from '@deck.gl/layers';
+import {CesiumIonLoader} from '@loaders.gl/3d-tiles';
 
 //import { BASEMAP } from '@deck.gl/carto';
 import StaticMap from 'react-map-gl';
-import { TerrainLayer } from '@deck.gl/geo-layers';
+import { TerrainLayer, Tile3DLayer } from '@deck.gl/geo-layers';
 import { stylesFactory } from '@grafana/ui';
 import { RGBAColor } from '@deck.gl/core';
 import { parseConfigJson } from 'common';
@@ -28,8 +29,21 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   const layers = config?.layers.map((l: any) => {
     switch (l.type) {
       case 'TerrainLayer':
-        if (!showTerrainLayer) return undefined;
+        if (!showTerrainLayer) {
+          return undefined;
+        }
         return new TerrainLayer(l);
+      case 'Tile3DLayer':
+        return new Tile3DLayer({
+          id: l.id,
+          data: l.data,
+          loader: CesiumIonLoader,
+          loadOptions: l.loadOptions,
+          // override scenegraph subLayer prop
+          _subLayerProps: {
+            scenegraph: {_lighting: 'flat'}
+          }
+        });
       case 'LineLayer':
         const lineLayerData: any[] = [];
         const lat = data.series.find((s) => l.dataMapping.latitude === s.refId!)?.fields[1].values.toArray() || [];
@@ -41,16 +55,20 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
             inbound: i - 1,
             outbound: i,
             from: {
-              name: `lat: ${lat[i - 1]}, lon: ${lon[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
-              coordinates: [lat[i - 1], lon[i - 1], ele[i - 1] + 5],
+              name: `lon: ${lon[i - 1]}, lat: ${lat[i - 1]}, ele: ${ele[i - 1]}, time: ${latTime[i - 1]}`,
+              coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + l.dataMapping.elevationOffset],
             },
             to: {
-              name: `lat: ${lat[i]}, lon: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
-              coordinates: [lat[i], lon[i], ele[i] + 5],
+              name: `lon: ${lon[i]}, lat: ${lon[i]}, ele: ${ele[i]} time: ${latTime[i]}`,
+              coordinates: [lon[i], lat[i], ele[i] + l.dataMapping.elevationOffset],
             },
           });
-          if (!initialLat) initialLat = lon[i - 1];
-          if (!initialLng) initialLng = lat[i - 1];
+          if (!initialLat) {
+            initialLat = lat[i - 1];
+          }
+          if (!initialLng) {
+            initialLng = lon[i - 1];
+          }
         }
 
         const ll = new LineLayer({
@@ -65,6 +83,8 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     }
     return undefined;
   });
+
+  layers.push();
 
   const initialViewState = config.initialViewState ?? {
     latitude: initialLat ?? 0,
