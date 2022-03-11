@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PanelProps, PanelData, LoadingState } from '@grafana/data';
-import { Options } from 'types';
+import { Options, setInitialViewStateLatLon, getInitialViewState } from 'types';
 import { css, cx } from 'emotion';
 import DeckGL from '@deck.gl/react';
 import { IconLayer, LineLayer } from '@deck.gl/layers';
@@ -18,7 +18,6 @@ interface Props extends PanelProps<Options> {}
 
 function readTimePosData(data: PanelData, l: any): any[] {
   const lineLayerData: any[] = [];
-
   var lat: number[] = [];
   // var latTime: number[] = [];
   var lon: number[] = [];
@@ -27,7 +26,6 @@ function readTimePosData(data: PanelData, l: any): any[] {
 
   // ugly but functional
   for (var s of series) {
-    // console.log(s);
     if (lat.length === 0) {
       lat = s.fields.find((field) => field.name === l.dataMapping.latitude)?.values.toArray() || [];
     }
@@ -62,11 +60,7 @@ function readTimePosData(data: PanelData, l: any): any[] {
   }
 
   if (data.state === LoadingState.Streaming) {
-    return [[
-      lon[lon.length - 1],
-      lat[lat.length - 1],
-      ele[ele.length - 1] + l.dataMapping.elevationOffset,
-    ]]
+    return [[lon[lon.length - 1], lat[lat.length - 1], ele[ele.length - 1] + l.dataMapping.elevationOffset]];
   }
 
   for (let i = 1; i <= lat.length - 1; i++) {
@@ -92,12 +86,15 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   const styles = getStyles();
   const config: any = parseConfigJson(options.editor.configJson);
   const [showTerrainLayer, setShowTerrainLayer] = useState(true);
-  console.log(`🚀 ~ data`, data);
+  const deckglConfig: any = {
+    controller: true,
+    initialViewState: config.initialViewState ?? getInitialViewState(),
+  };
 
   let initialLat: number | undefined = undefined;
   let initialLon: number | undefined = undefined;
 
-  const layers = config?.layers.map((l: any) => {
+  deckglConfig.layers = config?.layers.map((l: any) => {
     switch (l.type) {
       case 'TerrainLayer':
         if (!showTerrainLayer) {
@@ -117,7 +114,6 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         });
       case 'IconLayer':
         const iconLayerData = readTimePosData(data, l);
-        console.log("iconLayerData", iconLayerData);
         initialLon = iconLayerData[0][0];
         initialLat = iconLayerData[0][1];
         return new IconLayer({
@@ -132,10 +128,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
           },
           getIcon: (d) => l.icon,
           sizeScale: l.sizeScale,
-          getPosition: (d: any) => {
-            console.log("getPosition in IconLayer", d);
-            return d;
-          },
+          getPosition: (d: any) => d,
           getSize: (d: any) => l.size,
           getColor: (d: any) => l.color,
         });
@@ -162,15 +155,10 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     return [];
   });
 
-  const initialViewState = config.initialViewState ?? {
-    latitude: initialLat ?? 0,
-    longitude: initialLon ?? 0,
-    zoom: 14,
-    bearing: 20,
-    pitch: 20,
-    maxZoom: 19,
-    minZoom: 1,
-  };
+  useEffect(() => {
+    setInitialViewStateLatLon(initialLat ?? 0, initialLon ?? 0);
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <div
@@ -182,7 +170,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         `
       )}
     >
-      <DeckGL initialViewState={initialViewState} controller={true} layers={layers}>
+      <DeckGL {...deckglConfig}>
         {config.baseLayer ? (
           <>
             <StaticMap mapboxApiAccessToken={config.mapboxApiToken} mapStyle={config.baseLayer} />
