@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PanelProps } from '@grafana/data';
 import { Options } from 'types';
 import { css, cx } from 'emotion';
@@ -21,6 +21,7 @@ interface INote {
   lat?: number;
   lon?: number;
   z?: number;
+  showAddNote: boolean;
 }
 
 const ICON_MAPPING = {
@@ -34,10 +35,9 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   const [showTerrainLayer, setShowTerrainLayer] = useState(true);
   const [showLineLayer, setShowLineLayer] = useState(true);
   const [elevationOffset, setElevationOffset] = useState(10);
-  const [displayAddNote, setDisplayAddNote] = useState<INote>({});
+  const [displayAddNote, setDisplayAddNote] = useState<INote>({ showAddNote: false });
 
   const notes: INote[] = JSON.parse(localStorage.getItem('annotations') ?? '[]');
-  console.log(`🚀 ~ notes`, notes);
 
   let initialLat: number | undefined = undefined;
   let initialLng: number | undefined = undefined;
@@ -87,7 +87,8 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
               y: e.y,
               lat: e.coordinate?.[0],
               lon: e.coordinate?.[1],
-              z: (e.object as any).from.coordinates[2] + 300,
+              z: (e.object as any).from.coordinates[2] + 400,
+              showAddNote: true,
             });
           },
         });
@@ -108,9 +109,6 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     sizeScale: 5,
     // this is flipped right now
     getPosition: (d) => {
-      console.log(`🚀 ~ d`, d);
-      console.log(`🚀 ~ tPosit`);
-
       return [(d as any).lat, (d as any).lon, (d as any).z];
     },
     getSize: () => 10,
@@ -160,13 +158,19 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
         initialViewState={initialViewState}
         controller={true}
         layers={layers}
-        getTooltip={({ object }) => {
-          return object && `${object}`;
+        getTooltip={({ object }: { object: any }) => {
+          return (
+            object &&
+            object.label &&
+            `Coordinates: [${object?.lat.toFixed(2)},${object.lon.toFixed(2)}] \n ${object?.label}`
+          );
         }}
       >
         <StaticMap mapboxApiAccessToken={config.mapboxApiToken} mapStyle={config?.baseLayer} />
         <MapControls labels={labels} elevation={elevationOffset} onElevationChange={setElevationOffset} />
-        {displayAddNote.x && displayAddNote.y ? <AddNote note={displayAddNote} /> : null}
+        {displayAddNote.x && displayAddNote.y && displayAddNote.showAddNote ? (
+          <AddNote note={displayAddNote} onSubmit={setDisplayAddNote} />
+        ) : null}
       </DeckGL>
     </div>
   );

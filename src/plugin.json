@@ -2,19 +2,14 @@
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
   "name": "Geotrack",
-  "id": "grafana-geotrack-panel",
+  "id": "grafana-labs-geotrack-panel",
   "info": {
     "description": "View details about your gps aware tracks in Grafana",
     "author": {
       "name": "Stephanie Closson",
       "url": "https://grafana.om"
     },
-    "keywords": [
-      "gps",
-      "geospacial",
-      "track",
-      "trackmap"
-    ],
+    "keywords": ["gps", "geospacial", "track", "trackmap"],
     "logos": {
       "small": "img/logo.svg",
       "large": "img/logo.svg"

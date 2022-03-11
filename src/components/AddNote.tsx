@@ -2,13 +2,19 @@ import { Button, Field, Form, TextArea, Card } from '@grafana/ui';
 import React from 'react';
 import { css } from 'emotion';
 
-export const AddNote = ({ note }: { note: { x?: number; y?: number; lat?: number; lon?: number; z?: number } }) => {
-  const onSubmit = (e: any) => {
+export const AddNote = ({
+  note,
+  onSubmit,
+}: {
+  note: { x?: number; y?: number; lat?: number; lon?: number; z?: number };
+  onSubmit: React.Dispatch<React.SetStateAction<any>>;
+}) => {
+  const onSubmitForm = (e: any) => {
     let notes = localStorage.getItem('annotations');
     let parsedNotes: Record<string, any>[] = JSON.parse(notes ?? '[]');
-
     parsedNotes.push({ id: `note-${note.x}-${note.y}`, label: e?.note, ...note });
     localStorage.setItem(`annotations`, JSON.stringify(parsedNotes));
+    onSubmit({ displayAddNote: false });
   };
 
   return (
@@ -25,7 +31,7 @@ export const AddNote = ({ note }: { note: { x?: number; y?: number; lat?: number
         className={css`
           margin-top: 0;
         `}
-        onSubmit={onSubmit}
+        onSubmit={onSubmitForm}
       >
         {({ register, errors }) => (
           <>
