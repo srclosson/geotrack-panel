@@ -7,5 +7,4 @@ export const parseConfigJson = (json: string): any => {
   } catch (ex) {
     return {};
   }
-}
-  
+};
