@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PanelProps, PanelData, LoadingState, KeyValue } from '@grafana/data';
+import { PanelProps, PanelData, LoadingState, KeyValue, dateTime } from '@grafana/data';
 import { Options, setInitialViewStateLatLon, getInitialViewState } from 'types';
 import { css, cx } from 'emotion';
 import DeckGL from '@deck.gl/react';
@@ -31,6 +31,9 @@ function readTimePosData(data: PanelData, l: any): any[] {
         seriesMap[s.name!] = s.fields[1].values.toArray();
       }
     });
+    seriesMap['time'] = series[0].fields[0].values
+      .toArray()
+      .map((t: number) => dateTime(t).format('YYYY-MM-DD HH:mm:ss.SSS'));
   }
   // ugly but functional
   for (var s of series) {
@@ -78,7 +81,7 @@ function readTimePosData(data: PanelData, l: any): any[] {
     });
     const nameObjTo: any = {};
     Object.entries(seriesMap).forEach((value: [string, any[]]) => {
-      nameObjTo[value[0]] = value[1][i - 1];
+      nameObjTo[value[0]] = value[1][i];
     });
     const item: any = {
       inbound: i - 1,
@@ -167,7 +170,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
           initialLat = lineLayerData[lineLayerData.length - 1].to.coordinates[1];
         }
 
-        deckglConfig.getTooltip = ({ object }: any) => object && `${JSON.stringify(object.to.name, null, 2)}`;
+        deckglConfig.getTooltip = ({ object }: any) => object && `From: ${JSON.stringify(object.from.name, null, 8)}\nTo: ${JSON.stringify(object.to.name, null, 8)}`;
 
         const ll = new LineLayer({
           id: l.id,
@@ -181,8 +184,8 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
               if (typeof c === 'string') {
                 return d.from[c];
               }
-              if (typeof c === "object") {
-                return ((d.to.name[c.value] - c.min)/(c.max - c.min) * 255);
+              if (typeof c === 'object') {
+                return ((d.to.name[c.value] - c.min) / (c.max - c.min)) * 255;
               }
               return c;
             });
