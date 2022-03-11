@@ -16,7 +16,7 @@ import { MapControls } from './components/MapControls';
 import { AddNote } from './components/AddNote';
 
 interface Props extends PanelProps<Options> {}
-interface NoteInterface {
+interface InterfaceNote {
   x?: number;
   y?: number;
   lat?: number;
@@ -129,9 +129,9 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
   const [showTerrainLayer, setShowTerrainLayer] = useState(true);
   const [showLineLayer, setShowLineLayer] = useState(true);
   const [elevationOffset, setElevationOffset] = useState(10);
-  const [displayAddNote, setDisplayAddNote] = useState<INote>({ showAddNote: false });
+  const [displayAddNote, setDisplayAddNote] = useState<InterfaceNote>({ showAddNote: false });
 
-  const notes: NoteInterface[] = JSON.parse(localStorage.getItem('annotations') ?? '[]');
+  const notes: InterfaceNote[] = JSON.parse(localStorage.getItem('annotations') ?? '[]');
   const deckglConfig: any = {
     controller: true,
     initialViewState: config.initialViewState ?? getInitialViewState(),

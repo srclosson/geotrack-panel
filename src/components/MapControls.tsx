@@ -2,7 +2,7 @@ import { Collapse, Slider } from '@grafana/ui';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 
-interface LabelsInterface {
+interface InterfaceLabels {
   onClick: () => void;
   text: string;
   isActive: boolean;
@@ -13,7 +13,7 @@ export const MapControls = ({
   elevation,
   onElevationChange,
 }: {
-  labels: LabelsInterface[];
+  labels: InterfaceLabels[];
   elevation?: number;
   onElevationChange: (v: number) => void;
 }) => {
@@ -31,13 +31,14 @@ export const MapControls = ({
       onToggle={() => setIsOpen(!isOpen)}
       isOpen={isOpen}
     >
-      {labels.map((label) => {
+      {labels.map((label, i) => {
         return (
           <div
             className={css`
               font-weight: ${label.isActive ? 'bold' : 'normal'};
             `}
             onClick={label.onClick}
+            key={label.text + i}
           >
             {label.text}
           </div>
