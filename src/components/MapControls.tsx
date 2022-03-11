@@ -2,7 +2,7 @@ import { Collapse, Slider } from '@grafana/ui';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 
-interface ILabels {
+interface LabelsInterface {
   onClick: () => void;
   text: string;
   isActive: boolean;
@@ -13,7 +13,7 @@ export const MapControls = ({
   elevation,
   onElevationChange,
 }: {
-  labels: ILabels[];
+  labels: LabelsInterface[];
   elevation?: number;
   onElevationChange: (v: number) => void;
 }) => {
@@ -51,7 +51,9 @@ export const MapControls = ({
         orientation="horizontal"
         value={elevation ?? 10}
         onAfterChange={(v) => {
-          if (!v) return;
+          if (!v) {
+            return;
+          }
           onElevationChange(v);
         }}
       />

@@ -11,7 +11,7 @@ export const AddNote = ({
 }) => {
   const onSubmitForm = (e: any) => {
     let notes = localStorage.getItem('annotations');
-    let parsedNotes: Record<string, any>[] = JSON.parse(notes ?? '[]');
+    let parsedNotes: Array<Record<string, any>> = JSON.parse(notes ?? '[]');
     parsedNotes.push({ id: `note-${note.x}-${note.y}`, label: e?.note, ...note });
     localStorage.setItem(`annotations`, JSON.stringify(parsedNotes));
     onSubmit({ displayAddNote: false });
