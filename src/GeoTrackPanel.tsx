@@ -181,6 +181,9 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
               if (typeof c === 'string') {
                 return d.from[c];
               }
+              if (typeof c === "object") {
+                return ((d.to.name[c.value] - c.min)/(c.max - c.min) * 255);
+              }
               return c;
             });
           },
