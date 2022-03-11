@@ -1,4 +1,4 @@
-import { Collapse } from '@grafana/ui'; //Select
+import { Collapse } from '@grafana/ui';
 import { css } from 'emotion';
 import React, { useState } from 'react';
 
