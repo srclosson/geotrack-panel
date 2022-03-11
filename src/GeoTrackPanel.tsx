@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PanelProps, PanelData, LoadingState } from '@grafana/data';
+import { PanelProps, PanelData, LoadingState, KeyValue, dateTime } from '@grafana/data';
 import { Options, setInitialViewStateLatLon, getInitialViewState } from 'types';
 import { css, cx } from 'emotion';
 import DeckGL from '@deck.gl/react';
@@ -23,7 +23,18 @@ function readTimePosData(data: PanelData, l: any): any[] {
   var lon: number[] = [];
   var ele: number[] = [];
   const series = data.series;
+  const seriesMap: KeyValue<any[]> = {};
 
+  if (data.state !== LoadingState.Streaming) {
+    series.forEach((s: any) => {
+      if (!seriesMap[s.name!]) {
+        seriesMap[s.name!] = s.fields[1].values.toArray();
+      }
+    });
+    seriesMap['time'] = series[0].fields[0].values
+      .toArray()
+      .map((t: number) => dateTime(t).format('YYYY-MM-DD HH:mm:ss.SSS'));
+  }
   // ugly but functional
   for (var s of series) {
     if (lat.length === 0) {
@@ -64,18 +75,35 @@ function readTimePosData(data: PanelData, l: any): any[] {
   }
 
   for (let i = 1; i <= lat.length - 1; i++) {
-    lineLayerData.push({
+    const nameObjFrom: any = {};
+    Object.entries(seriesMap).forEach((value: [string, any[]]) => {
+      nameObjFrom[value[0]] = value[1][i - 1];
+    });
+    const nameObjTo: any = {};
+    Object.entries(seriesMap).forEach((value: [string, any[]]) => {
+      nameObjTo[value[0]] = value[1][i];
+    });
+    const item: any = {
       inbound: i - 1,
       outbound: i,
       from: {
-        name: `lon: ${lon[i - 1]}, lat: ${lat[i - 1]}, ele: ${ele[i - 1]}`,
-        coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + 5],
+        name: nameObjFrom,
+        coordinates: [lon[i - 1], lat[i - 1], ele[i - 1] + l.dataMapping.elevationOffset],
       },
       to: {
-        name: `lon: ${lon[i]}, lat: ${lat[i]}, ele: ${ele[i]}`,
+        name: nameObjTo,
         coordinates: [lon[i], lat[i], ele[i] + l.dataMapping.elevationOffset],
       },
-    });
+    };
+    if (l.color) {
+      l.color.forEach((colorEntry: any) => {
+        if (typeof colorEntry === 'string' && seriesMap[colorEntry]) {
+          item.from[colorEntry] = seriesMap[colorEntry][i - 1];
+          item.to[colorEntry] = seriesMap[colorEntry][i];
+        }
+      });
+    }
+    lineLayerData.push(item);
   }
 
   return lineLayerData;
@@ -93,7 +121,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
 
   let initialLat: number | undefined = undefined;
   let initialLon: number | undefined = undefined;
-
+  console.log('data', data);
   deckglConfig.layers = config?.layers.map((l: any) => {
     switch (l.type) {
       case 'TerrainLayer':
@@ -142,13 +170,26 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
           initialLat = lineLayerData[lineLayerData.length - 1].to.coordinates[1];
         }
 
+        deckglConfig.getTooltip = ({ object }: any) => object && `From: ${JSON.stringify(object.from.name, null, 8)}\nTo: ${JSON.stringify(object.to.name, null, 8)}`;
+
         const ll = new LineLayer({
           id: l.id,
           data: lineLayerData,
           getWidth: l.getWidth,
+          pickable: l.pickable ?? false,
           getSourcePosition: (d: any) => d.from.coordinates,
           getTargetPosition: (d: any) => d.to.coordinates,
-          getColor: (d: any): RGBAColor => [d.from.coordinates[2], 100, 0],
+          getColor: (d: any): RGBAColor => {
+            return l.color.map((c: any) => {
+              if (typeof c === 'string') {
+                return d.from[c];
+              }
+              if (typeof c === 'object') {
+                return ((d.to.name[c.value] - c.min) / (c.max - c.min)) * 255;
+              }
+              return c;
+            });
+          },
         });
         return ll;
     }
