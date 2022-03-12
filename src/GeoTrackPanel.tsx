@@ -136,11 +136,15 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
     controller: true,
     initialViewState: config.initialViewState ?? getInitialViewState(),
     getTooltip: ({ object }: { object: any }) => {
-      return (
-        object &&
-        object.label &&
-        `Coordinates: [${object?.lat.toFixed(2)},${object.lon.toFixed(2)}] \n ${object?.label}`
-      );
+      if (object) {
+        if (object.label) {
+          return `Coordinates: [${object?.lat.toFixed(2)},${object.lon.toFixed(2)}] \n ${object?.label}`;
+        }
+        if (object.to.name && object.from.name) {
+          return `From: ${JSON.stringify(object.from.name, null, 8)}\nTo: ${JSON.stringify(object.to.name, null, 8)}`;
+        }
+      }
+      return;
     },
   };
 
@@ -195,10 +199,6 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
           initialLat = lineLayerData[lineLayerData.length - 1].to.coordinates[1];
         }
 
-        // deckglConfig.getTooltip = ({ object }: any) =>
-        //   object &&
-        //   `From: ${JSON.stringify(object.from.name, null, 8)}\nTo: ${JSON.stringify(object.to.name, null, 8)}`;
-
         const ll = new LineLayer({
           id: l.id,
           data: lineLayerData,
@@ -213,7 +213,7 @@ export const GeotrackPanel: React.FC<Props> = ({ options, data, width, height })
               y: e.y,
               lat: e.coordinate?.[0],
               lon: e.coordinate?.[1],
-              z: (e.object as any).from.coordinates[2] + 400,
+              z: (e.object as any).from.coordinates[2] + l.dataMapping.elevationOffset,
               showAddNote: true,
             });
           },
